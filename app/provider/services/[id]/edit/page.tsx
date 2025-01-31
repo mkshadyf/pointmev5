@@ -11,14 +11,14 @@ export default async function EditServicePage({
 
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await (await supabase).auth.getUser();
 
   if (!user) {
     return redirect("/sign-in");
   }
 
   // Fetch the service
-  const { data: service } = await supabase
+  const { data: service } = await (await supabase)
     .from("services")
     .select("*")
     .eq("id", params.id)

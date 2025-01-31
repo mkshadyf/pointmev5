@@ -8,7 +8,7 @@ import ProviderServicesList from "@/components/provider/provider-services-list";
 import ProviderStats from "@/components/provider/provider-stats";
 
 export default async function ProviderDashboard() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

@@ -1,8 +1,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import ServiceForm from "@/components/services/service-form";
+import ProviderOnboardingForm from "@/components/provider/provider-onboarding-form";
 
-export default async function NewServicePage() {
+export default async function ProviderOnboardingPage() {
   const supabase = await createClient();
 
   const {
@@ -13,28 +13,28 @@ export default async function NewServicePage() {
     return redirect("/sign-in");
   }
 
-  // Verify user is a provider
+  // Check if already onboarded
   const { data: profile } = await supabase
     .from("profiles")
-    .select("role")
+    .select("*")
     .eq("id", user.id)
     .single();
 
-  if (profile?.role !== "provider" && profile?.role !== "admin") {
-    return redirect("/");
+  if (profile?.role === "provider") {
+    return redirect("/provider");
   }
 
   return (
     <div className="flex-1 flex flex-col gap-6 p-4 md:p-8">
       <div>
-        <h1 className="text-2xl font-bold">Add New Service</h1>
+        <h1 className="text-2xl font-bold">Become a Service Provider</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Create a new service offering for your customers.
+          Complete your profile to start offering services on Pointme.
         </p>
       </div>
 
       <div className="max-w-2xl">
-        <ServiceForm />
+        <ProviderOnboardingForm userId={user.id} />
       </div>
     </div>
   );

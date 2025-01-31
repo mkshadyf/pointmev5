@@ -3,7 +3,7 @@ import ServiceCard from "@/components/services/service-card";
 import { Badge } from "@/components/ui/badge";
 
 export default async function Home() {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Fetch services with provider details
   const { data: services } = await supabase
