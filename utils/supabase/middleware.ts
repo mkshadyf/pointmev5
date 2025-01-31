@@ -39,13 +39,47 @@ export const updateSession = async (request: NextRequest) => {
     // https://supabase.com/docs/guides/auth/server-side/nextjs
     const user = await supabase.auth.getUser();
 
-    // protected routes
-    if (request.nextUrl.pathname.startsWith("/protected") && user.error) {
-      return NextResponse.redirect(new URL("/sign-in", request.url));
+    // Get user role if authenticated
+    let userRole = 'guest';
+    if (!user.error) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.data.user.id)
+        .single();
+      userRole = profile?.role || 'customer';
     }
 
-    if (request.nextUrl.pathname === "/" && !user.error) {
-      return NextResponse.redirect(new URL("/protected", request.url));
+    // Protected routes handling
+    if (request.nextUrl.pathname.startsWith("/protected")) {
+      if (user.error) {
+        return NextResponse.redirect(new URL("/sign-in", request.url));
+      }
+    }
+
+    // Role-based route protection
+    if (request.nextUrl.pathname.startsWith("/admin") && userRole !== 'admin') {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    if (request.nextUrl.pathname.startsWith("/provider")) {
+      if (userRole !== 'provider' && userRole !== 'admin') {
+        return NextResponse.redirect(new URL("/", request.url));
+      }
+    }
+
+    // Redirect authenticated users based on role
+    if (request.nextUrl.pathname === "/") {
+      if (!user.error) {
+        switch (userRole) {
+          case 'admin':
+            return NextResponse.redirect(new URL("/admin", request.url));
+          case 'provider':
+            return NextResponse.redirect(new URL("/provider", request.url));
+          case 'customer':
+            return NextResponse.redirect(new URL("/bookings", request.url));
+        }
+      }
     }
 
     return response;
