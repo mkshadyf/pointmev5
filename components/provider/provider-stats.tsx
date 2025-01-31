@@ -8,7 +8,7 @@ interface ProviderStatsProps {
   services?: Service[] | null;
   bookings?: Booking[] | null;
 }
-
+ 
 export default function ProviderStats({ services, bookings }: ProviderStatsProps) {
   const totalServices = services?.length || 0;
   const totalBookings = bookings?.length || 0;
