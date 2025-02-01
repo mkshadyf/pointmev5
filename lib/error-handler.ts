@@ -4,13 +4,14 @@ import {
   ErrorCode, 
   ErrorCodes, 
   ErrorDetails, 
-  ErrorContext 
+  ErrorContext,
+  ErrorCategory,
+  ErrorSeverity 
 } from "./error-types";
 
 export class AppError extends Error {
   code: ErrorCode;
   details: ErrorDetails;
-  context?: ErrorContext;
 
   constructor(
     message: string,
@@ -41,8 +42,16 @@ export class AppError extends Error {
     return this.details.path;
   }
 
-  public get recoverySteps(): string[] | undefined {
+  public get recoverySteps(): readonly string[] | undefined {
     return this.details.recoverySteps;
+  }
+
+  public get severity(): ErrorSeverity {
+    return this.details.severity;
+  }
+
+  public get category(): ErrorCategory {
+    return this.details.category;
   }
 }
 
@@ -50,10 +59,13 @@ export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
 }
 
-interface ErrorResponse extends Message {
+export interface ErrorResponse {
+  message: string;
   code?: string;
-  recoverySteps?: string[];
+  recoverySteps?: readonly string[];
   retry?: boolean;
+  severity?: ErrorSeverity;
+  category?: ErrorCategory;
 }
 
 export function handleError(error: unknown): ErrorResponse {
@@ -61,23 +73,29 @@ export function handleError(error: unknown): ErrorResponse {
 
   if (isAppError(error)) {
     return {
-      error: error.message,
+      message: error.message,
       code: error.code,
       recoverySteps: error.recoverySteps,
       retry: error.isRetryable,
+      severity: error.severity,
+      category: error.category,
     };
   }
 
   if (error instanceof Error) {
     return {
-      error: error.message,
+      message: error.message,
       retry: true,
+      severity: "error",
+      category: "system",
     };
   }
 
   return {
-    error: "An unexpected error occurred",
+    message: "An unexpected error occurred",
     retry: true,
+    severity: "error",
+    category: "system",
   };
 }
 
@@ -91,7 +109,7 @@ export async function handleActionError(
     return encodedRedirect(
       "error",
       error.redirectPath || redirectPath || "/",
-      error.message
+      errorResponse.message
     );
   }
 
@@ -99,7 +117,7 @@ export async function handleActionError(
     return encodedRedirect(
       "error",
       redirectPath,
-      errorResponse.error
+      errorResponse.message
     );
   }
 

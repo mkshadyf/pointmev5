@@ -1,0 +1,11 @@
+     // .vscode/extensions.json
+     {
+        "recommendations": [
+          "dbaeumer.vscode-eslint",
+          "esbenp.prettier-vscode",
+          "bradlc.vscode-tailwindcss",
+          "prisma.prisma",
+          "graphql.vscode-graphql",
+          "ms-playwright.playwright"
+        ]
+      }

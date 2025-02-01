@@ -70,7 +70,7 @@ export default function ServiceForm({ service }: ServiceFormProps) {
       price: service?.price.toString() || "",
       duration: service?.duration.toString() || "",
       category: service?.category || "other",
-      location: service?.location || "",
+       
     },
   });
 
